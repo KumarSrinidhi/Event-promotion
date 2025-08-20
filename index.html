@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RV University - Confidential Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Confidential database access">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #00ff41;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Matrix-style background effect */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        /* Glitch effect for title */
+        .glitch {
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 0.05em 0 0 #00ff41, -0.03em -0.04em 0 #ff00c1,
+                         0.025em 0.04em 0 #ffff00;
+            animation: glitch 725ms infinite;
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        .glitch span {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .glitch span:first-child {
+            animation: glitch 500ms infinite;
+            color: #ff00c1;
+            z-index: -1;
+        }
+
+        .glitch span:last-child {
+            animation: glitch 375ms infinite;
+            color: #ffff00;
+            z-index: -2;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 0.05em 0 0 #00ff41, -0.03em -0.04em 0 #ff00c1,
+                             0.025em 0.04em 0 #ffff00;
+            }
+            15% {
+                text-shadow: 0.05em 0 0 #00ff41, -0.03em -0.04em 0 #ff00c1,
+                             0.025em 0.04em 0 #ffff00;
+            }
+            16% {
+                text-shadow: -0.05em -0.025em 0 #00ff41, 0.025em 0.035em 0 #ff00c1,
+                             -0.05em -0.05em 0 #ffff00;
+            }
+            49% {
+                text-shadow: -0.05em -0.025em 0 #00ff41, 0.025em 0.035em 0 #ff00c1,
+                             -0.05em -0.05em 0 #ffff00;
+            }
+            50% {
+                text-shadow: 0.05em 0.035em 0 #00ff41, 0.03em 0 0 #ff00c1,
+                             0 -0.04em 0 #ffff00;
+            }
+            99% {
+                text-shadow: 0.05em 0.035em 0 #00ff41, 0.03em 0 0 #ff00c1,
+                             0 -0.04em 0 #ffff00;
+            }
+            100% {
+                text-shadow: -0.05em 0 0 #00ff41, -0.025em -0.04em 0 #ff00c1,
+                             -0.04em -0.025em 0 #ffff00;
+            }
+        }
+
+        /* Terminal window */
+        .terminal {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-right: 1rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            font-size: 0.9rem;
+            color: #00ff41;
+        }
+
+        .typing-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .cursor {
+            display: inline-block;
+            background-color: #00ff41;
+            width: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Enhanced download button */
+        .download-container {
+            text-align: center;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1));
+            color: #00ff41;
+            border: 2px solid #00ff41;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .download-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Status indicators */
+        .status-bar {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff41;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Warning message */
+        .warning {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff6b6b;
+            padding: 0.8rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .terminal {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .download-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    
+    <h1 class="glitch" id="title">
+        <span>RV UNIVERSITY</span>
+        <span>RV UNIVERSITY</span>
+        RV UNIVERSITY
+    </h1>
+
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="terminal-title">secure_access.exe</div>
+        </div>
+        
+        <div class="warning">
+            ⚠️ CONFIDENTIAL: Unauthorized access detected
+        </div>
+        
+        <div class="typing-text" id="typing-text"></div>
+        
+        <div class="download-container">
+            <a class="download-btn" href="#" id="downloadBtn">
+                📁 ACCESS DATABASE
+            </a>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-dot"></div>
+            <span>CONNECTION: SECURE</span>
+        </div>
+        <div class="status-item">
+            <div class="status-dot"></div>
+            <span>ENCRYPTION: AES-256</span>
+        </div>
+        <div class="status-item">
+            <div class="status-dot"></div>
+            <span>STATUS: ACTIVE</span>
+        </div>
+    </div>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+        const matrixArray = matrix.split("");
+
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // Typing effect
+        const messages = [
+            "Initializing secure connection...",
+            "Bypassing firewall protocols...",
+            "Accessing student database...",
+            "Decrypting confidential files...",
+            "⚠️ CRITICAL DATA FOUND ⚠️",
+            "",
+            "Download initiated. File contains:",
+            "• Student records and grades",
+            "• Administrative passwords", 
+            "• Upcoming exam papers",
+            "• Faculty private communications",
+            "",
+            "Click below to download before access expires..."
+        ];
+
+        let messageIndex = 0;
+        let charIndex = 0;
+        const typingElement = document.getElementById('typing-text');
+
+        function typeMessage() {
+            if (messageIndex < messages.length) {
+                const currentMessage = messages[messageIndex];
+                
+                if (charIndex < currentMessage.length) {
+                    typingElement.innerHTML += currentMessage.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeMessage, 50);
+                } else {
+                    typingElement.innerHTML += '<br>';
+                    messageIndex++;
+                    charIndex = 0;
+                    setTimeout(typeMessage, messageIndex === 4 ? 1000 : 300);
+                }
+            } else {
+                typingElement.innerHTML += '<span class="cursor">|</span>';
+                // Show download button only after typing is complete
+                setTimeout(() => {
+                    document.getElementById('downloadBtn').classList.add('visible');
+                }, 500);
+            }
+        }
+
+        // Start typing effect after a short delay
+        setTimeout(typeMessage, 1000);
+
+        // Download button functionality
+        document.getElementById('downloadBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Download PDF file from local path
+            const link = document.createElement('a');
+            link.href = 'rv_university_confidential.pdf'; // PDF in same folder as HTML
+            link.download = 'rv_university_confidential.pdf';
+            link.click();
+            
+            // Optional: Show success message
+            this.innerHTML = '✅ DOWNLOADED';
+            this.style.background = 'rgba(0, 255, 65, 0.2)';
+            setTimeout(() => {
+                this.innerHTML = '📁 ACCESS DATABASE';
+                this.style.background = 'linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1))';
+            }, 2000);
+        });
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
